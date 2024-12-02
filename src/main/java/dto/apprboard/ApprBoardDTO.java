@@ -1,8 +1,6 @@
-package z_domain.apprboard;
+package dto.apprboard;
 
 import java.sql.Date;
-
-import org.springframework.stereotype.Component;
 
 
 public class ApprBoardDTO {

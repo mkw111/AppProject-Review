@@ -1,66 +1,63 @@
-package z_domain.apprboard;
+package service;
 
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import dao.ApprBoardDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import z_domain.common.EmpDTO;
+import dto.apprboard.ApprBoardDTO;
+import dto.apprboard.ApprHistoryDTO;
+import dto.common.EmpDTO;
 
 @Service
 @Transactional
 public class ApprBoardService {
 
-	private final ApprBoardDao ad;
+	private final ApprBoardDao apprBoardDao;
 
 	@Autowired
-	public ApprBoardService(ApprBoardDao ad) {
-		this.ad = ad;
+	public ApprBoardService(ApprBoardDao apprBoardDao) {
+		this.apprBoardDao = apprBoardDao;
 	}
 
 	public int getNextNo() {
-		int nextNo = ad.getNextNo();
-		return nextNo;
+        return apprBoardDao.getNextNo();
 	}
 
 	public EmpDTO getLoginedEmp(String id) {
-		EmpDTO loginedEmp = ad.findById(id);
-		return loginedEmp;
+        return apprBoardDao.findById(id);
 	}
 
 	public List<Map<String, Object>> getApprBoards(Map<String, Object> searchData) {
-		List<Map<String, Object>> apprBoards = ad.findByAll(searchData);
-		return apprBoards;
+        return apprBoardDao.findByAll(searchData);
 	}
 
 	public ApprBoardDTO getApprBoard(int seq) {
-		ApprBoardDTO apprBoard = ad.findBySeq(seq);
-		return apprBoard;
+        return apprBoardDao.findBySeq(seq);
 	}
 
 	public List<ApprHistoryDTO> getApprHistory(int seq) {
-		List<ApprHistoryDTO> ApprHistory = ad.getApprHistory(seq);
-		return ApprHistory;
+        return apprBoardDao.getApprHistory(seq);
 	}
 
-	public void saveTemp(Map<String, Object> tempData) {
+	//성공 실패 여부를 리턴해주는것이 좋음 : 하지 않을경우 사용자는 성공했는지 실패했는지 알수가 없음
+	public int saveTemp(Map<String, Object> tempData) {
 		String seq = (String) tempData.get("seq");
 
 		int tempSaved = 0;
 		if (seq == null || seq.isEmpty()) {
-			tempSaved = ad.insertTempSave(tempData);
+			tempSaved = apprBoardDao.insertTempSave(tempData);
 		} else {
-			tempSaved = ad.updateTempSave(tempData);
+			tempSaved = apprBoardDao.updateTempSave(tempData);
 		}
 
+		return tempSaved;
 	}
 
+	//해당 메서드도 위와 동일
 	public void apprSave(Map<String, Map<String, Object>> combinedData) {
 
 		// 결재 데이터
@@ -69,14 +66,14 @@ public class ApprBoardService {
 		int apprSaved = 0;
 		String seq = (String) apprData.get("seq");
 		if (seq == null || seq.isEmpty()) {
-			apprSaved = ad.insertApprSave(apprData);
+			apprSaved = apprBoardDao.insertApprSave(apprData);
 		} else {
-			apprSaved = ad.updateApprSave(apprData);
+			apprSaved = apprBoardDao.updateApprSave(apprData);
 		}
 
 		// history 데이터
 		Map<String, Object> historyData = combinedData.get("history");
-		int historySaved = ad.insertHistorySave(historyData);
+		int historySaved = apprBoardDao.insertHistorySave(historyData);
 
 	}
 
@@ -84,20 +81,19 @@ public class ApprBoardService {
 
 		// 결재 데이터
 		Map<String, Object> rejectionData = combinedData.get("rejection");
-		int rejectionSaved = ad.rejectAppr(rejectionData);
+		int rejectionSaved = apprBoardDao.rejectAppr(rejectionData);
 
 		// history 데이터
 		Map<String, Object> historyData = combinedData.get("history");
-		int historySaved = ad.insertHistorySave(historyData);
+		int historySaved = apprBoardDao.insertHistorySave(historyData);
 	}
 
 	public List<EmpDTO> getProxyApprover(Integer rank) {
-		List<EmpDTO> proxApprovers = ad.findByRank(rank);
-		return proxApprovers;
+        return apprBoardDao.findByRank(rank);
 	}
 
 	public void grantProxyAppr(Map<String, String> proxyForm) {
-		int proxyResult = ad.grantProxyAppr(proxyForm);
+		int proxyResult = apprBoardDao.grantProxyAppr(proxyForm);
 
 	}
 }

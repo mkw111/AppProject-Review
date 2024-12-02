@@ -1,11 +1,12 @@
-package z_domain.login;
+package dao;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import z_domain.apprboard.ApprProxyDTO;
-import z_domain.common.EmpDTO;
+import dto.apprboard.ApprProxyDTO;
+import dto.common.EmpDTO;
+import dto.LoginDTO;
 
 @Repository
 public class LoginDao {

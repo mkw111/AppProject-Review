@@ -1,4 +1,4 @@
-package z_domain.apprboard;
+package dao;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,9 @@ import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import z_domain.common.EmpDTO;
+import dto.apprboard.ApprBoardDTO;
+import dto.apprboard.ApprHistoryDTO;
+import dto.common.EmpDTO;
 
 @Repository
 public class ApprBoardDao {

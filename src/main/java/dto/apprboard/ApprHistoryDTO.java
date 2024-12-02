@@ -1,4 +1,4 @@
-package z_domain.apprboard;
+package dto.apprboard;
 
 import java.sql.Date;
 

@@ -1,4 +1,4 @@
-package z_domain.login;
+package dto;
 
 public class LoginDTO {
 	

@@ -18,7 +18,6 @@
 	</resultMap>
 	
 	<select id="findByAll" parameterType="map" resultMap="apprBoards">
-		/*ApprBoardDao.findByAll*/
 		SELECT rownum as count, eb.seq, eb.name, eb.subject, eb.content, eb.reg_date, eb.app_date, e.name as approver, e.position, eb.app_status, eb.app_content
 		FROM   jo_emp e, 
 						(

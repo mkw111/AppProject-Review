@@ -1,4 +1,4 @@
-package z_domain.common;
+package dto.common;
 
 public class EmpDTO {
 	
