@@ -1,0 +1,43 @@
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "ApprBoardDao">
+	
+	<insert id="historySave" parameterType="java.util.HashMap">
+		INSERT INTO jo_approval_historys( 
+				NO
+				,SEQ
+				,REG_DATE
+				,APPROVER
+				,POSITION
+				,APP_STATUS	
+		 ) VALUES(
+				(SELECT nvl(max(no), 0) + 1 FROM jo_approval_historys)
+				,#{seq}
+				,sysdate
+				,#{approver}
+				,#{position}
+				,#{appStatus}
+		  )					
+	</insert>
+	
+	<resultMap type="z_domain.apprboard.ApprHistoryDTO" id="apprHisotry">
+		<result column="no" property="no"/>
+		<result column="seq" property="seq"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="approver" property="approver"/>
+		<result column="app_status" property="appStatus"/>
+	</resultMap>
+		
+	<select id="getApprHistory" parameterType="int" resultMap="apprHisotry">
+		SELECT ROW_NUMBER() OVER(order by h.no) no
+			   ,h.seq
+			   ,h.reg_date
+			   ,e.name as approver
+			   ,s.app_content as app_status
+		FROM   jo_approval_historys h, jo_emp e, jo_approval_status s
+		WHERE  seq = #{seq}
+		AND    h.approver = e.id
+		AND    h.app_status = s.app_status
+	</select>
+</mapper>

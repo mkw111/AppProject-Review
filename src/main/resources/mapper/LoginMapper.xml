@@ -1,0 +1,63 @@
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "LoginMapper">
+	
+	<select id="getTotalId" parameterType="z_domain.login.LoginDTO" resultType="int">
+		SELECT count(id) 
+		FROM   jo_emp
+		WHERE  id = #{id}
+	</select>
+	
+	<select id="checkPassword" parameterType="z_domain.login.LoginDTO" resultType="int">
+		SELECT count(password) 
+		FROM   jo_emp
+		WHERE  id = #{id} 
+		AND    password = #{password}
+	</select>
+		
+	<select id="findById" resultType="z_domain.common.EmpDTO">
+		SELECT 	 id
+				,password
+				,name
+				,position
+				,rank
+		FROM    jo_emp
+		WHERE   id = #{id}
+	</select>
+	
+	<resultMap type="z_domain.apprboard.ApprProxyDTO" id="apprProxyDTO">
+		<result column="id" property="id"/>
+		<result column="authorizer" property="authorizer"/>
+		<result column="name" property="name"/>
+		<result column="auth_position" property="authPosition"/>
+		<result column="proxy_approver" property="proxyApprover"/>
+		<result column="proxy_position" property="proxyPosition"/>
+		<result column="proxy_start_date" property="proxyStartDate"/>
+		<result column="proxy_end_date" property="proxyEndDate"/>
+		<result column="status" property="status"/>
+	</resultMap>
+		
+	<select id="getProxyInfo" resultMap="apprProxyDTO">
+		SELECT p.id
+			   ,p.authorizer
+			   ,e.name
+			   ,p.auth_position
+			   ,p.proxy_approver
+			   ,p.proxy_position
+			   ,p.proxy_start_date
+			   ,p.proxy_end_date
+			   ,p.status
+		FROM   jo_approval_proxies p, jo_emp e
+		WHERE  p.authorizer = e.id  
+		AND    p.proxy_approver = #{id}
+	</select>
+	
+	<update id="updateProxyInfo">
+		UPDATE jo_approval_proxies
+		SET    status = 'EXPIRED'
+		WHERE  proxy_approver = #{id}
+		AND    sysdate > proxy_end_date
+	</update>
+	
+</mapper>

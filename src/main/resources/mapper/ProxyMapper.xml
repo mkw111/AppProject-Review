@@ -1,0 +1,44 @@
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "ProxyMapper">
+	<select id="findByRank" resultType="z_domain.common.EmpDTO">
+		SELECT id, password, name, position, rank
+		FROM   jo_emp
+		WHERE  rank between #{rank} + 1 and #{rank} + 2
+		AND    id not in (
+							SELECT proxy_approver
+							FROM   jo_approval_proxies
+							WHERE  status = 'ACTIVE'
+						  )	
+	</select>
+	
+	<insert id="saveProxyAppr" parameterType="map">
+		INSERT INTO jo_approval_proxies(
+			id
+			,authorizer
+			,auth_position
+			,proxy_approver
+			,proxy_position
+			,proxy_start_date
+			,proxy_end_date
+			,status
+		) VALUES (
+			(SELECT NVL(max(id), 0) + 1 FROM jo_approval_proxies)
+			,#{authorizer}
+			,#{authPosition}
+			,#{proxyApprover}
+			,#{proxyPosition}
+			,sysdate
+			,sysdate + 1
+			,'ACTIVE'
+		)
+	</insert>
+	
+	<update id="updateProxyStatus">
+		UPDATE jo_approval_proxies
+		SET    status = 'EXPIRED'
+		WHERE  sysdate > proxy_end_date
+		AND    authorizer = #{id}
+	</update>
+</mapper>

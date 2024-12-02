@@ -1,0 +1,194 @@
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "ApprBoardDao">
+	
+	<resultMap type="map" id="apprBoards">
+		<result column="seq" property="seq"/>
+		<result column="name" property="name"/>
+		<result column="subject" property="subject"/>
+		<result column="content" property="content"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="app_date" property="appDate"/>
+		<result column="approver" property="approver"/>
+		<result column="position" property="position"/>
+		<result column="app_status" property="appStatus"/>
+		<result column="app_content" property="appContent"/>
+		<result column="count" property="postNum"/>
+	</resultMap>
+	
+	<select id="findByAll" parameterType="map" resultMap="apprBoards">
+		SELECT rownum as count, eb.seq, eb.name, eb.subject, eb.content, eb.reg_date, eb.app_date, e.name as approver, e.position, eb.app_status, eb.app_content
+		FROM   jo_emp e, 
+						(
+							SELECT b.seq, e.name, b.subject, b.content, b.reg_date, b.app_date, b.approver, b.app_status, s.app_content, e.rank
+							FROM   jo_emp e, jo_approval_boards b, jo_approval_status s
+							WHERE  b.id = e.id AND b.app_status = s.app_status
+							<choose>
+								<when test="position == 'S'.toString() or position == 'AM'.toString()">
+									AND e.name = #{name}
+								</when>
+								<when test="position == 'M'.toString()">
+								  	AND (
+								  			e.name = #{name}
+								  			OR b.app_status = 'BB'
+								  			OR (b.approver = #{id} AND b.app_status = 'EE')
+								  			OR b.seq in	(
+									  						SELECT seq
+															FROM jo_approval_historys
+															WHERE seq IN (
+													    					SELECT seq
+													    					FROM jo_approval_historys s
+													    					WHERE app_status = 'CC'
+													    					AND approver = #{id}
+													    					AND no = (
+													        							SELECT MAX(no)
+													        							FROM jo_approval_historys h
+													        							WHERE h.seq = s.seq
+																					    AND app_status = 'CC'
+																					   )
+																			)
+															GROUP BY seq
+								  		 				   )
+								  		 )                      
+								</when>
+								<when test="position == 'SM'">
+									AND (
+											(b.app_status = 'CC' OR b.app_status = 'DD') 
+										 	OR e.name = #{name}
+										 	OR (b.approver = #{id} AND b.app_status = 'EE')
+										 ) 
+								</when>
+							</choose>
+						) eb
+		WHERE e.id(+) = eb.approver
+		<choose>
+			<when test="type == 'name'">
+				AND eb.name like '%' || #{keyword} || '%'
+			</when>
+			<when test="type == 'approver'">
+				AND e.name like '%' || #{keyword} || '%'
+			</when>
+			<when test="type == 'subject'">
+				AND (
+						eb.subject like '%' || #{keyword} || '%' OR
+						eb.content like '%' || #{keyword} || '%'
+					 )
+			</when>
+		</choose>
+		<if test="startDate != null and startDate != ''">
+			AND to_char(eb.reg_date, 'yyyy-MM-dd') between #{startDate} and #{endDate}
+		</if>
+		<if test="appStatus != null and appStatus != ''">
+			AND eb.app_status = #{appStatus}
+		</if>
+		ORDER BY eb.seq
+	</select>
+	
+	<select id="getNextNo" resultType="int">
+		SELECT NVL(max(seq), 0) + 1 
+		FROM   jo_approval_boards
+	</select>
+	
+	<insert id="tempSave" parameterType="map">
+		INSERT INTO jo_approval_boards(
+				seq
+			   ,id
+			   ,subject
+			   ,content
+			   ,reg_date
+			   ,app_status
+		) VALUES (
+				(SELECT nvl(max(seq),0) + 1 FROM jo_approval_boards)
+				,#{id}
+				,#{subject}
+				,#{content}
+				,sysdate
+				,#{appStatus}
+		)
+	</insert>
+	
+	<update id="tempUpdate" parameterType="map">
+		UPDATE jo_approval_boards 
+		SET    subject = #{subject}
+			   ,content = #{content}
+		<if test='position == "S" or position == "AM"'>	
+			   ,approver = null
+			   ,app_status = #{appStatus}
+			   ,app_date = ''
+		</if>
+		WHERE   seq = #{seq}
+	</update>
+	
+	<select id="findBySeq" parameterType="int" resultType="z_domain.apprboard.ApprBoardDTO">
+		SELECT 	seq
+				,id
+				,subject
+				,content
+				,app_status as appStatus
+		FROM    jo_approval_boards
+		WHERE   seq = #{seq}
+	</select>
+
+	<insert id="approvalSave" parameterType="map">
+	INSERT INTO jo_approval_boards(
+				seq
+				,id
+				,subject
+				,content
+				,reg_date
+			<if test="position == 'M'.toString() || position == 'SM'">
+		    	,app_date
+				,approver
+			</if>
+				,app_status
+	) VALUES(
+				(SELECT nvl(max(seq),0) + 1 FROM jo_approval_boards)
+				,#{id}
+				,#{subject}
+				,#{content}
+				,sysdate
+			<if test="position == 'M'.toString() || position == 'SM'">
+				,sysdate
+				,#{approver}
+			</if>
+				,#{appStatus}
+	 )
+	</insert>
+	
+	<update id="approvalUpdate" parameterType="map">
+		UPDATE jo_approval_boards 
+		SET    subject = #{subject}
+			   ,content = #{content}
+			   ,app_status = #{appStatus}
+		<if test="position == 'S'.toString() or position == 'AM'.toString()">
+			   ,approver = null
+			   ,app_date = #{appDate}
+		</if>
+		<if test="position == 'M'.toString() or position == 'SM'.toString()">
+			   ,approver = #{approver}
+			   ,app_date = sysdate
+		</if>
+		WHERE  seq = #{seq}
+	</update>
+	
+	<update id="approvalReject" parameterType="map">
+		UPDATE jo_approval_boards 
+		SET    app_status = #{appStatus}
+		       ,approver = #{approver}
+		       ,app_date = sysdate
+		WHERE  seq = #{seq}
+	</update>
+	
+	<select id="findById" resultType="z_domain.common.EmpDTO">
+		SELECT 	id
+				,password
+				,name
+				,position
+				,rank
+		FROM    jo_emp
+		WHERE   id = #{id}
+	</select>
+	
+</mapper>
+  

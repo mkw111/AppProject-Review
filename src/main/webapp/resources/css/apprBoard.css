@@ -1,0 +1,107 @@
+/* 결재 상태 테이블 스타일 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table th, table td {
+    width: 33.33%; /* 열 너비 균등 */
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+table tbody td input[type="checkbox"] {
+    width: 20px; /* 체크박스 크기 조정 */
+    height: 20px;
+}
+
+/* historyTable 스타일 */
+#historyTable th {
+    background-color: #4CAF50; /* 체크박스 테이블과 동일한 배경색 */
+    color: white;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+#historyTable th, #historyTable td {
+    width: 25%; /* 번호, 결재일, 결재자, 결재상태 열 너비 균등 분할 */
+}
+
+/* 제목과 내용 입력 필드 크기 설정 */
+form fieldset input[type="text"]#subject {
+    width: 100%; /* 너비 설정 */
+    max-width: 580px;
+    height: 30px; /* 높이 조정 */
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box; /* padding 포함한 크기 지정 */
+}
+
+form fieldset textarea#content {
+    width: 100%; /* 너비 설정 */
+    max-width: 580px;
+    height: 100px; /* textarea 높이 */
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+/* Form 스타일 */
+form {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+form fieldset {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+form fieldset input[type="button"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+form fieldset input[type="button"]:hover {
+    background-color: #45a049;
+}
+
+form fieldset label {
+    display: block;
+    margin-top: 10px;
+}
+
+form fieldset .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* 버튼 간격 */
+    margin-top: 10px;
+}
+
+/* 체크박스 그룹 스타일 */
+.checkbox-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
